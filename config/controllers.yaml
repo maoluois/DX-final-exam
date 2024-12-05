@@ -1,0 +1,27 @@
+controller:
+  hero_chassis_controller:
+    type: hero_chassis_controller/HeroChassisController
+    front_left:
+      p: 0.0
+      i: 0.0
+      d: 0.0
+
+    front_right:
+      p: 0.0
+      i: 0.0
+      d: 0.0
+
+    back_left:
+      p: 0.0
+      i: 0.0
+      d: 0.0
+
+    back_right:
+      p: 0.0
+      i: 0.0
+      d: 0.0
+
+
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
