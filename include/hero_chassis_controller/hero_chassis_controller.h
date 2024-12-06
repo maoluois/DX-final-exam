@@ -39,6 +39,10 @@ private:
   double target_velocity_3_ = 0;
   double target_velocity_4_ = 0;
 
+  double i_clamp_max = 10;
+  double i_clamp_min = -10;
+
+
   // 从参数服务器加载PID参数
   bool loadPIDParams(ros::NodeHandle& controller_nh, control_toolbox::Pid& pid, const std::string& prefix);
 };

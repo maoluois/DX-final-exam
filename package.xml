@@ -20,8 +20,9 @@
   <depend>control_toolbox</depend>
   <depend>pluginlib</depend>
   <depend>rm_description</depend>
+  <depend>dynamic_reconfigure</depend>
 
   <export>
-    <controller_interface plugin="$./hero_chassis_controller_plugins.xml"/>
+    <controller_interface plugin="${prefix}/hero_chassis_controller_plugins.xml"/>
   </export>
 </package>

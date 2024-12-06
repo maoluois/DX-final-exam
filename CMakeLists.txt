@@ -144,9 +144,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  src/${PROJECT_NAME}.cpp
-  ../hero_chassis_controller/src/hero_chassis_controller.cpp
-  ../hero_chassis_controller/include/hero_chassis_controller/hero_chassis_controller.h
+  src/hero_chassis_controller.cpp
 )
 
 
@@ -165,6 +163,9 @@ add_library(${PROJECT_NAME}
 ## target back to the shorter version for ease of user use
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
+
+# for dynamic reconfigure
+add_executable(hero_chassis_controller_node src/hero_chassis_controller.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -195,7 +196,9 @@ add_dependencies(${PROJECT_NAME}
 # install(TARGETS ${PROJECT_NAME}_node
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
-
+#install(FILES hero_chassis_controller_plugins.xml
+#        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+#)
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
 # install(TARGETS ${PROJECT_NAME}
@@ -230,3 +233,4 @@ add_dependencies(${PROJECT_NAME}
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+roslint_cpp()

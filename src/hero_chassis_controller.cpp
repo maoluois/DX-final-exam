@@ -5,6 +5,7 @@
 #include "hero_chassis_controller/hero_chassis_controller.h"
 #include <pluginlib/class_list_macros.hpp>
 
+
 namespace hero_chassis_controller {
 bool HeroChassisController::init(hardware_interface::EffortJointInterface* effort_joint_interface,
                                    ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh)
@@ -15,13 +16,13 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
   back_right_joint_ = effort_joint_interface->getHandle("right_back_wheel_joint");
 
   // 从参数服务器加载PID参数
-  if (!loadPIDParams(controller_nh, pid_front_left_, "front_left_wheel_joint"))
+  if (!loadPIDParams(controller_nh, pid_front_left_, "front_left"))
     return false;
-  if (!loadPIDParams(controller_nh, pid_front_right_, "front_right_wheel_joint"))
+  if (!loadPIDParams(controller_nh, pid_front_right_, "front_right"))
     return false;
-  if (!loadPIDParams(controller_nh, pid_back_left_, "back_left_wheel_joint"))
+  if (!loadPIDParams(controller_nh, pid_back_left_, "back_left"))
     return false;
-  if (!loadPIDParams(controller_nh, pid_back_right_, "back_right_wheel_joint"))
+  if (!loadPIDParams(controller_nh, pid_back_right_, "back_right"))
     return false;
 
   // 设置目标速度
@@ -29,6 +30,8 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
   target_velocity_2_ = 1.0;
   target_velocity_3_ = 1.0;
   target_velocity_4_ = 1.0;
+
+  ROS_INFO("Successfully init controller.");
   return true;
 }
 
@@ -73,7 +76,24 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   // front_right_joint_.setCommand(cmd_[state_][1]);
   // back_left_joint_.setCommand(cmd_[state_][2]);
   // back_right_joint_.setCommand(cmd_[state_][3]);
+  // ROS_INFO("Successfully update controller.");
 }
+
+bool HeroChassisController::loadPIDParams(ros::NodeHandle& controller_nh, control_toolbox::Pid& pid, const std::string& prefix)
+{
+  double p, i, d;
+  if (!controller_nh.getParam(prefix + "/p", p) ||
+      !controller_nh.getParam(prefix + "/i", i) ||
+      !controller_nh.getParam(prefix + "/d", d))
+  {
+    ROS_ERROR_STREAM("Cannot find required parameter '" << prefix << "'");
+    return false;
+  }
+  pid.initPid(p, i, d, i_clamp_max, i_clamp_min);
+  return true;
+}
+
+
 
 PLUGINLIB_EXPORT_CLASS(hero_chassis_controller::HeroChassisController, controller_interface::ControllerBase)
 }  // namespace hero_chassis_controller
