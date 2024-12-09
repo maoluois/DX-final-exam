@@ -42,6 +42,8 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
 
   cmd_vel_sub_ = root_nh.subscribe("/cmd_vel", 1, &HeroChassisController::cmdVelCallback, this);
 
+  odom_pub_ = root_nh.advertise(nav)
+
   ROS_INFO("Successfully init controller with target velocities: FL=%f, FR=%f, BL=%f, BR=%f",
            target_velocity_1_, target_velocity_2_, target_velocity_3_, target_velocity_4_);
   return true;
