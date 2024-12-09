@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
    control_toolbox
    dynamic_reconfigure
    pluginlib
+   geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -130,6 +131,7 @@ catkin_package(
    control_toolbox
    pluginlib
    dynamic_reconfigure
+   geometry_msgs
    DEPENDS
 )
 
