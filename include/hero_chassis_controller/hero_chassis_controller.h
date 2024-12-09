@@ -61,8 +61,11 @@ private:
   ros::Subscriber cmd_vel_sub_;
   ros::Publisher odom_pub_;
 
+  double x_;
+  double y_;
+  double theta_;
 
-
+  ros::Time last_time_;
 
 };
   // 从参数服务器加载PID参数

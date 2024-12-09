@@ -35,14 +35,24 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
     ROS_WARN("Using default track_width: %f", track_width_);
   }
 
+  // 初始化低通滤波器
   fliter_front_left_ = Filter();
   fliter_front_right_ = Filter();
   fliter_back_left_ = Filter();
   fliter_back_right_ = Filter();
 
+  // 订阅/cmd_vel话题
   cmd_vel_sub_ = root_nh.subscribe("/cmd_vel", 1, &HeroChassisController::cmdVelCallback, this);
 
-  odom_pub_ = root_nh.advertise(nav)
+  // 发布里程计信息
+  odom_pub_ = root_nh.advertise<nav_msgs::Odometry>("odom", 1);
+
+  // 初始化里程计信息
+  x_ = 0.0;
+  y_ = 0.0;
+  theta_ = 0.0;
+
+  last_time_ = ros::Time::now();
 
   ROS_INFO("Successfully init controller with target velocities: FL=%f, FR=%f, BL=%f, BR=%f",
            target_velocity_1_, target_velocity_2_, target_velocity_3_, target_velocity_4_);
@@ -64,16 +74,35 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   // double current_velocity_4 = back_right_joint_.getVelocity();
 
   // PID计算
-  double control_effort_front_left = pid_front_left_.computeCommand(target_velocity_1_ - current_velocity_1, period);
-  double control_effort_front_right = pid_front_right_.computeCommand(target_velocity_2_ - current_velocity_2, period);
-  double control_effort_back_left = pid_back_left_.computeCommand(target_velocity_3_ - current_velocity_3, period);
-  double control_effort_back_right = pid_back_right_.computeCommand(target_velocity_4_ - current_velocity_4, period);
+  double front_left_v = pid_front_left_.computeCommand(target_velocity_1_ - current_velocity_1, period);
+  double front_right_v = pid_front_right_.computeCommand(target_velocity_2_ - current_velocity_2, period);
+  double back_left_v = pid_back_left_.computeCommand(target_velocity_3_ - current_velocity_3, period);
+  double back_right_v = pid_back_right_.computeCommand(target_velocity_4_ - current_velocity_4, period);
 
   // 设置控制命令
-  front_left_joint_.setCommand(control_effort_front_left);
-  front_right_joint_.setCommand(control_effort_front_right);
-  back_left_joint_.setCommand(control_effort_back_left);
-  back_right_joint_.setCommand(control_effort_back_right);
+  front_left_joint_.setCommand(front_left_v);
+  front_right_joint_.setCommand(front_right_v);
+  back_left_joint_.setCommand(back_left_v);
+  back_right_joint_.setCommand(back_right_v);
+
+  // 正运动学解算
+  std::vector<double> baselink = Kinematics::forwardKinematics(front_left_v, front_right_v, back_left_v, back_right_v, wheel_base_, track_width_, wheel_radius);
+  double dt = (time - last_time_).toSec();
+  double delta_x = (baselink[0] * cos(theta_) - baselink[1] * sin(theta_)) * dt;
+  double delta_y = (baselink[0] * sin(theta_) + baselink[1] * cos(theta_)) * dt;
+  double delta_theta = baselink[2] * dt;
+
+  x_ += delta_x;
+  y_ += delta_y;
+
+  // 标准化角度
+  theta_ = normalizeAngle(theta_ + delta_theta);
+
+  // 弧度转角度
+  double Degree = radians2degrees(theta_);
+  last_time_ = time;
+
+  std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << std::endl;
 }
 
 void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
@@ -86,6 +115,7 @@ void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr&
   double W = track_width_;
   double r = wheel_radius;
 
+  // 逆运动学计算目标速度
   std::vector<double> wheel_speeds = Kinematics::inverseKinematics(vx, vy, wz, L, W, r);
   target_velocity_1_ = wheel_speeds[0];
   target_velocity_2_ = wheel_speeds[1];
