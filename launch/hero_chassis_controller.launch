@@ -10,6 +10,9 @@
   <!-- launch dynamic reconfigure node -->
   <node name="dynamic_reconfigure" pkg="hero_chassis_controller" type="dynamic_reconfigure_node" respawn="false" output="screen"/>
 
+  <!-- cmd_vel_mux -->
+  <node name="cmd_vel" pkg="hero_chassis_controller"  respawn="false" type="cmd_vel" output="screen"/>
+
   <!-- boost controller -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
         output="screen" args="
