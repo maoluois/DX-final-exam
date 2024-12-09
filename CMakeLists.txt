@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
    hardware_interface
    forward_command_controller
    control_toolbox
+   dynamic_reconfigure
    pluginlib
 )
 
@@ -56,11 +57,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+ add_message_files(
+   FILES
+   WheelParams.msg
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -77,10 +77,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
+
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -97,10 +98,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+#add dynamic reconfigure api
+generate_dynamic_reconfigure_options(
+        cfg/HeroChassisController.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -128,6 +129,7 @@ catkin_package(
    forward_command_controller
    control_toolbox
    pluginlib
+   dynamic_reconfigure
    DEPENDS
 )
 
@@ -142,9 +144,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
+## Declare a C++ library（非可执行文件）
 add_library(${PROJECT_NAME}
   src/hero_chassis_controller.cpp
+  src/Algorithm.cpp
 )
 
 
@@ -165,17 +168,17 @@ add_library(${PROJECT_NAME}
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 
 # for dynamic reconfigure
-add_executable(hero_chassis_controller_node src/hero_chassis_controller.cpp)
+# add .exe后一定可执行文件一定要有main函数
+add_executable(dynamic_reconfigure_node src/server.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(${PROJECT_NAME}
-   ${catkin_EXPORTED_TARGETS}
-)
+# make sure configure headers are built before any node using them
+add_dependencies(dynamic_reconfigure_node ${PROJECT_NAME}_gencfg)
+
 ## Specify libraries to link a library or executable target against
- target_link_libraries(${PROJECT_NAME}
-   ${catkin_LIBRARIES}
- )
+# for dynamic reconfigure
+target_link_libraries(dynamic_reconfigure_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##

@@ -3,24 +3,27 @@ controller:
     type: hero_chassis_controller/HeroChassisController
     front_left:
       p: 10.0
-      i: 0.0
+      i: 0.5
       d: 0.0
+      target_velocity: 10.0
 
     front_right:
       p: 10.0
-      i: 0.0
+      i: 0.5
       d: 0.0
+      target_velocity: 10.0
 
     back_left:
       p: 10.0
-      i: 0.0
+      i: 0.5
       d: 0.0
+      target_velocity: 10.0
 
     back_right:
       p: 10.0
-      i: 0.0
+      i: 0.5
       d: 0.0
-
+      target_velocity: 10.0
 
   joint_state_controller:
     type: joint_state_controller/JointStateController

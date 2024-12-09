@@ -5,12 +5,15 @@
     <arg name="paused" value="true"/>
   </include>
 
-  <rosparam file="$(find hero_chassis_controller)/config/controllers.yaml" command="load"/>
-  <!-- load the controllers -->
+  <rosparam file="$(find hero_chassis_controller)/cfg/controllers.yaml" command="load"/>
+
+  <!-- launch dynamic reconfigure node -->
+  <node name="dynamic_reconfigure" pkg="hero_chassis_controller" type="dynamic_reconfigure_node" respawn="false" output="screen"/>
+
+  <!-- boost controller -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
         output="screen" args="
         controller/hero_chassis_controller
         controller/joint_state_controller
   "/>
-
 </launch>
