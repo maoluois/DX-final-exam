@@ -170,6 +170,7 @@ add_library(${PROJECT_NAME}
 # for dynamic reconfigure
 # add .exe后一定可执行文件一定要有main函数
 add_executable(dynamic_reconfigure_node src/server.cpp)
+add_executable(cmd_vel src/cmd_vel.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
