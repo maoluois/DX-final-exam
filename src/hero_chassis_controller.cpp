@@ -23,10 +23,24 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
   if (!loadParams(controller_nh, pid_back_right_, target_velocity_4_, "back_right"))
     return false;
 
+  // 从参数服务器加载轴距和轮距，如果没有配置文件，则使用默认值
+  if (!controller_nh.getParam("wheel_base", wheel_base_))
+  {
+    wheel_base_ = 0.4; // 默认值
+    ROS_WARN("Using default wheel_base: %f", wheel_base_);
+  }
+  if (!controller_nh.getParam("track_width", track_width_))
+  {
+    track_width_ = 0.4; // 默认值
+    ROS_WARN("Using default track_width: %f", track_width_);
+  }
+
   fliter_front_left_ = Filter();
   fliter_front_right_ = Filter();
   fliter_back_left_ = Filter();
   fliter_back_right_ = Filter();
+
+  cmd_vel_sub_ = root_nh.subscribe("/cmd_vel", 1, &HeroChassisController::cmdVelCallback, this);
 
   ROS_INFO("Successfully init controller with target velocities: FL=%f, FR=%f, BL=%f, BR=%f",
            target_velocity_1_, target_velocity_2_, target_velocity_3_, target_velocity_4_);
@@ -58,6 +72,23 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   front_right_joint_.setCommand(control_effort_front_right);
   back_left_joint_.setCommand(control_effort_back_left);
   back_right_joint_.setCommand(control_effort_back_right);
+}
+
+void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
+{
+  double vx = msg->linear.x;
+  double vy = msg->linear.y;
+  double wz = msg->angular.z;
+
+  double L = wheel_base_;
+  double W = track_width_;
+  double r = wheel_radius;
+
+  std::vector<double> wheel_speeds = Kinematics::inverseKinematics(vx, vy, wz, L, W, r);
+  target_velocity_1_ = wheel_speeds[0];
+  target_velocity_2_ = wheel_speeds[1];
+  target_velocity_3_ = wheel_speeds[2];
+  target_velocity_4_ = wheel_speeds[3];
 }
 
 bool HeroChassisController::loadParams(ros::NodeHandle& controller_nh, control_toolbox::Pid& pid, double& target_velocity, const std::string& prefix)

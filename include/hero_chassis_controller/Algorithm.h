@@ -1,5 +1,6 @@
-#ifndef FILTER_H
-#define FILTER_H
+#ifndef ALGORITHM_H
+#define ALGORITHM_H
+#include <vector>
 
 class Filter
 {
@@ -14,4 +15,13 @@ private:
   double prev_output_;  // 前一个输出值
 };
 
-#endif // FILTER_H
+class Kinematics
+{
+public:
+  static std::vector<double> inverseKinematics(double vx, double vy, double wz, double wheel_base, double track_width, double r);
+};
+
+
+#endif // ALGORITHM_H
+
+

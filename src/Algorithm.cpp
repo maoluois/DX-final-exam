@@ -10,3 +10,20 @@ double Filter::lowPassFilter(double input, double alpha)
   prev_output_ = output;
   return output;
 }
+
+std::vector<double> Kinematics::inverseKinematics(double vx, double vy, double wz, double wheel_base, double track_width, double r)
+{
+  double L = wheel_base;
+  double W = track_width;
+
+  std::vector<double> wheel_speeds(4);
+  wheel_speeds[0] = (vx - vy - (L + W) * wz) / r;
+  wheel_speeds[1] = (vx + vy + (L + W) * wz) / r;
+  wheel_speeds[2] = (vx + vy - (L + W) * wz) / r;
+  wheel_speeds[3] = (vx - vy + (L + W) * wz) / r;
+
+  return wheel_speeds;
+
+}
+
+

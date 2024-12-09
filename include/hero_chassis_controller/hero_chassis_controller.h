@@ -11,6 +11,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <std_msgs/Float64.h>
 #include <hero_chassis_controller/Algorithm.h>
+#include <geometry_msgs/Twist.h>
 // #include "hero_chassis_controller/WheelParams.h"
 
 namespace hero_chassis_controller
@@ -25,8 +26,6 @@ public:
             ros::NodeHandle& controller_nh) override;
 
   void update(const ros::Time& time, const ros::Duration& period) override;
-
-  // void reconfigureCallback(hero_chassis_controller::HeroChassisControllerConfig &config, uint32_t level);
 
   hardware_interface::JointHandle front_left_joint_, front_right_joint_, back_left_joint_, back_right_joint_;
 
@@ -54,6 +53,12 @@ private:
   double i_clamp_min = -10;
 
   bool loadParams(ros::NodeHandle& controller_nh, control_toolbox::Pid& pid, double& target_velocity, const std::string& prefix);
+
+  double wheel_radius = 0.07625;
+  double wheel_base_;
+  double track_width_;
+  ros::Subscriber cmd_vel_sub_;
+  void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& cmd_vel_msg);
 };
   // 从参数服务器加载PID参数
 };  //  namespace hero_chassis_controller
