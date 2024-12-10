@@ -12,6 +12,7 @@
 #include <std_msgs/Float64.h>
 #include <hero_chassis_controller/Algorithm.h>
 #include <geometry_msgs/Twist.h>
+#include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 // #include "hero_chassis_controller/WheelParams.h"
 
@@ -55,15 +56,15 @@ private:
   double i_clamp_min = -10;
 
   double wheel_radius = 0.07625;
-  double wheel_base_;
-  double track_width_;
+  double wheel_base_ = 0.4;
+  double track_width_ = 0.4;
 
   ros::Subscriber cmd_vel_sub_;
   ros::Publisher odom_pub_;
 
-  double x_;
-  double y_;
-  double theta_;
+  double x_ = 0.0;
+  double y_ = 0.0;
+  double theta_ = 0.0;
 
   ros::Time last_time_;
 

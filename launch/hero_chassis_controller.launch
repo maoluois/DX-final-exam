@@ -13,8 +13,8 @@
   <!-- cmd_vel_mux -->
   <node name="cmd_vel" pkg="hero_chassis_controller" respawn="false" type="cmd_vel" output="screen"/>
 
-  <!-- teleop_twist_keyboard -->
-  <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard" output="screen"/>
+<!--  &lt;!&ndash; teleop_twist_keyboard &ndash;&gt;-->
+<!--  <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/>-->
 
   <!-- boost controller -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"

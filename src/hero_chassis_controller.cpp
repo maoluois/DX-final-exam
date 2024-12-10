@@ -46,7 +46,7 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
   cmd_vel_sub_ = root_nh.subscribe("/cmd_vel", 10, &HeroChassisController::cmdVelCallback, this);
 
   // 发布里程计信息
-  odom_pub_ = root_nh.advertise<nav_msgs::Odometry>("odom", 1);
+  odom_pub_ = root_nh.advertise<nav_msgs::Odometry>("odom", 10);
 
   // 初始化里程计信息
   x_ = 0.0;
@@ -104,6 +104,16 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   double Degree = radians2degrees(theta_);
 
   std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << std::endl;
+
+  // 发布里程计信息
+  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
+
+  nav_msgs::Odometry odom;
+  odom.header.stamp = time;
+  odom.header.frame_id = "odom";
+  odom.child_frame_id = "base_link";
+
+
 
   last_time_ = time;
 }
