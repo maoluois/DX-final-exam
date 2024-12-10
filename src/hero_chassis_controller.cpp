@@ -1,5 +1,6 @@
 #include "hero_chassis_controller/hero_chassis_controller.h"
 #include <pluginlib/class_list_macros.hpp>
+#include <cmath>
 
 
 namespace hero_chassis_controller {
@@ -42,7 +43,7 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
   fliter_back_right_ = Filter();
 
   // 订阅/cmd_vel话题
-  cmd_vel_sub_ = root_nh.subscribe("/cmd_vel", 1, &HeroChassisController::cmdVelCallback, this);
+  cmd_vel_sub_ = root_nh.subscribe("/cmd_vel", 10, &HeroChassisController::cmdVelCallback, this);
 
   // 发布里程计信息
   odom_pub_ = root_nh.advertise<nav_msgs::Odometry>("odom", 1);
@@ -89,6 +90,7 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   std::vector<double> baselink = Kinematics::forwardKinematics(front_left_v, front_right_v, back_left_v, back_right_v, wheel_base_, track_width_, wheel_radius);
   double dt = (time - last_time_).toSec();
   double delta_x = (baselink[0] * cos(theta_) - baselink[1] * sin(theta_)) * dt;
+  // std::cout << baselink[0] << " " << baselink[1] << " " << baselink[2] << std::endl;
   double delta_y = (baselink[0] * sin(theta_) + baselink[1] * cos(theta_)) * dt;
   double delta_theta = baselink[2] * dt;
 
@@ -100,9 +102,10 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
 
   // 弧度转角度
   double Degree = radians2degrees(theta_);
-  last_time_ = time;
 
   std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << std::endl;
+
+  last_time_ = time;
 }
 
 void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
@@ -110,6 +113,8 @@ void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr&
   double vx = msg->linear.x;
   double vy = msg->linear.y;
   double wz = msg->angular.z;
+
+  // std::cout << "vx: " << vx << " vy: " << vy << " wz: " << wz << std::endl;
 
   double L = wheel_base_;
   double W = track_width_;
@@ -121,6 +126,8 @@ void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr&
   target_velocity_2_ = wheel_speeds[1];
   target_velocity_3_ = wheel_speeds[2];
   target_velocity_4_ = wheel_speeds[3];
+
+  // std::cout<< "target_velocity_1_: " << target_velocity_1_ << " target_velocity_2_: " << target_velocity_2_ << " target_velocity_3_: " << target_velocity_3_ << " target_velocity_4_: " << target_velocity_4_ << std::endl;
 }
 
 bool HeroChassisController::loadParams(ros::NodeHandle& controller_nh, control_toolbox::Pid& pid, double& target_velocity, const std::string& prefix)
