@@ -8,11 +8,13 @@
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <control_toolbox/pid.h>
-#include <dynamic_reconfigure/server.h>
 #include <std_msgs/Float64.h>
 #include <hero_chassis_controller/Algorithm.h>
 #include <geometry_msgs/Twist.h>
-#include <tf/transform_broadcaster.h>
+#include <geometry_msgs/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <nav_msgs/Odometry.h>
 // #include "hero_chassis_controller/WheelParams.h"
 
@@ -40,7 +42,6 @@ private:
   control_toolbox::Pid pid_back_left_;
   control_toolbox::Pid pid_back_right_;
 
-
   Filter fliter_front_left_;
   Filter fliter_front_right_;
   Filter fliter_back_left_;
@@ -61,12 +62,22 @@ private:
 
   ros::Subscriber cmd_vel_sub_;
   ros::Publisher odom_pub_;
+  ros::Time last_time_;
+
+  nav_msgs::Odometry odom;
+  // ??? 不能用静态变量
+  tf2_ros::TransformBroadcaster odom_broadcaster;
+  tf2::Quaternion q;
+  geometry_msgs::Quaternion odom_quat;
+  geometry_msgs::TransformStamped odom_trans;
+  std::vector<double> baselink;
+  std::vector<double> wheel_speeds;
 
   double x_ = 0.0;
   double y_ = 0.0;
   double theta_ = 0.0;
 
-  ros::Time last_time_;
+
 
 };
   // 从参数服务器加载PID参数

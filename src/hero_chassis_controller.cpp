@@ -45,7 +45,7 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
   // 订阅/cmd_vel话题
   cmd_vel_sub_ = root_nh.subscribe("/cmd_vel", 10, &HeroChassisController::cmdVelCallback, this);
 
-  // 发布里程计信息
+  // // 发布里程计信息
   odom_pub_ = root_nh.advertise<nav_msgs::Odometry>("odom", 10);
 
   // 初始化里程计信息
@@ -87,7 +87,7 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   back_right_joint_.setCommand(back_right_v);
 
   // 正运动学解算
-  std::vector<double> baselink = Kinematics::forwardKinematics(front_left_v, front_right_v, back_left_v, back_right_v, wheel_base_, track_width_, wheel_radius);
+  baselink = Kinematics::forwardKinematics(front_left_v, front_right_v, back_left_v, back_right_v, wheel_base_, track_width_, wheel_radius);
   double dt = (time - last_time_).toSec();
   double delta_x = (baselink[0] * cos(theta_) - baselink[1] * sin(theta_)) * dt;
   // std::cout << baselink[0] << " " << baselink[1] << " " << baselink[2] << std::endl;
@@ -101,20 +101,35 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   theta_ = normalizeAngle(theta_ + delta_theta);
 
   // 弧度转角度
-  double Degree = radians2degrees(theta_);
+  // double Degree = radians2degrees(theta_);
 
-  std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << std::endl;
+  // std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << std::endl;
 
-  // 发布里程计信息
-  geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
-
-  nav_msgs::Odometry odom;
+  // 设置odom的名称和时间戳
+  q.setRPY(0.0, 0.0, theta_);  // 设置roll, pitch, yaw（这里roll和pitch为0）
+  geometry_msgs::Quaternion odom_quat = tf2::toMsg(q);  // 将四元数转换为 ROS 消息类型
   odom.header.stamp = time;
   odom.header.frame_id = "odom";
-  odom.child_frame_id = "base_link";
 
+  // 设置odom的位置
+  odom.pose.pose.position.x = x_;
+  odom.pose.pose.position.y = y_;
+  odom.pose.pose.position.z = 0.0;
+  odom.pose.pose.orientation = odom_quat;
 
+  odom_pub_.publish(odom);
 
+  odom_trans.header.stamp = time;
+  odom_trans.header.frame_id = "odom";
+  odom_trans.child_frame_id = "base_link";
+
+  odom_trans.transform.translation.x = x_;
+  odom_trans.transform.translation.y = y_;
+  odom_trans.transform.translation.z = 0.0;
+  odom_trans.transform.rotation = odom_quat;
+
+  // send the transform
+  odom_broadcaster.sendTransform(odom_trans);
   last_time_ = time;
 }
 
@@ -131,7 +146,7 @@ void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr&
   double r = wheel_radius;
 
   // 逆运动学计算目标速度
-  std::vector<double> wheel_speeds = Kinematics::inverseKinematics(vx, vy, wz, L, W, r);
+  wheel_speeds = Kinematics::inverseKinematics(vx, vy, wz, L, W, r);
   target_velocity_1_ = wheel_speeds[0];
   target_velocity_2_ = wheel_speeds[1];
   target_velocity_3_ = wheel_speeds[2];

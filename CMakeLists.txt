@@ -16,13 +16,15 @@ find_package(catkin REQUIRED COMPONENTS
    roscpp
    roslint
    controller_interface
+   tf2_ros
+   tf2
    hardware_interface
    forward_command_controller
    control_toolbox
    dynamic_reconfigure
-   pluginlib
    geometry_msgs
    nav_msgs
+   pluginlib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -126,14 +128,16 @@ catkin_package(
    CATKIN_DEPENDS
    roscpp
    roslint
+   tf2_ros
+   tf2
    controller_interface
    hardware_interface
    forward_command_controller
    control_toolbox
-   pluginlib
    dynamic_reconfigure
    geometry_msgs
    nav_msgs
+   pluginlib
    DEPENDS
 )
 
@@ -186,6 +190,7 @@ add_dependencies(cmd_vel  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_
 # for dynamic reconfigure
 target_link_libraries(dynamic_reconfigure_node ${catkin_LIBRARIES})
 target_link_libraries(cmd_vel ${catkin_LIBRARIES})
+target_link_libraries(hero_chassis_controller ${catkin_LIBRARIES})
 
 #############
 ## Install ##
