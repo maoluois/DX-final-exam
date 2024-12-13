@@ -100,10 +100,14 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   // 正运动学解算
   baselink = Kinematics::forwardKinematics(front_left_v, front_right_v, back_left_v, back_right_v, wheel_base_, track_width_, wheel_radius);
   double dt = (time - last_time_).toSec();
-  double delta_x = (baselink[0] * cos(theta_) - baselink[1] * sin(theta_)) * dt;
-  // std::cout << baselink[0] << " " << baselink[1] << " " << baselink[2] << std::endl;
-  double delta_y = (baselink[0] * sin(theta_) + baselink[1] * cos(theta_)) * dt;
+  double vx = baselink[0] * cos(theta_) - baselink[1] * sin(theta_);
+  double vy = baselink[0] * sin(theta_) + baselink[1] * cos(theta_);
+  double vtheta = baselink[2];
+  double delta_x = vx * dt;
+  double delta_y = vy * dt;
   double delta_theta = baselink[2] * dt;
+
+  // std::cout << baselink[0] << " " << baselink[1] << " " << baselink[2] << std::endl;
 
   x_ += delta_x;
   y_ += delta_y;
@@ -111,10 +115,11 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   // 标准化角度
   theta_ = normalizeAngle(theta_ + delta_theta);
 
-  // 弧度转角度
+  // // 弧度转角度
   // double Degree = radians2degrees(theta_);
 
   // std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << std::endl;
+  // std::cout << "vx: " << vx << " vy: " << vy << " vtheta: " << vtheta << std::endl;
 
   // 设置odom的名称和时间戳
   q.setRPY(0.0, 0.0, theta_);  // 设置roll, pitch, yaw（这里roll和pitch为0）
@@ -127,6 +132,12 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   odom.pose.pose.position.y = y_;
   odom.pose.pose.position.z = 0.0;
   odom.pose.pose.orientation = odom_quat;
+
+  // 设置odom的速度
+  odom.twist.twist.linear.x = vx;
+  odom.twist.twist.linear.y = vy;
+  odom.twist.twist.angular.z = vtheta;
+
   // 发布odom
   odom_pub_.publish(odom);
 
@@ -178,10 +189,14 @@ void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr&
 
     try
     {
+      // 使用最新的时间戳
+      velocity_global.header.stamp = tfBuffer_.lookupTransform("base_link", "odom", ros::Time(0)).header.stamp;
       tfBuffer_.transform(velocity_global, velocity_base, "base_link");
+      // ROS_INFO("Transformed vector: x=%.2f, y=%.2f, z=%.2f",
+      //          velocity_base.vector.x, velocity_base.vector.y, velocity_base.vector.z);
+
       vx = velocity_base.vector.x;
       vy = velocity_base.vector.y;
-      std::cout << "vx: " << vx << " vy: " << vy << std::endl;
 
       // 逆运动学计算目标速度
       wheel_speeds = Kinematics::inverseKinematics(vx, vy, wz, L, W, r);
@@ -196,10 +211,6 @@ void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr&
       ROS_WARN("Could not transform velocity from odom to base_link: %s", ex.what());
     }
   }
-
-
-
-
 
 
 }
