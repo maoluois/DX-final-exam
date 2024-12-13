@@ -25,7 +25,7 @@ namespace hero_chassis_controller
 class HeroChassisController : public controller_interface::Controller<hardware_interface::EffortJointInterface>
 {
 public:
-  HeroChassisController() = default;
+  HeroChassisController();
   ~HeroChassisController() override = default;
 
   bool init(hardware_interface::EffortJointInterface* effort_joint_interface, ros::NodeHandle& root_nh,
@@ -70,6 +70,8 @@ private:
   // ??? 不能用静态变量
   tf2_ros::TransformBroadcaster odom_broadcaster;
   tf2_ros::Buffer tfBuffer_;
+  // tf_listener_ 要在类成员初始化列表中初始化，生命周期要比类成员变量长，在Init函数中初始化会被销毁
+  tf2_ros::TransformListener tf_listener_;
   tf2::Quaternion q;
   geometry_msgs::Quaternion odom_quat;
   geometry_msgs::TransformStamped odom_trans;

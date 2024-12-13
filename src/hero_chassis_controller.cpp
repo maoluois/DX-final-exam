@@ -2,11 +2,15 @@
 #include <pluginlib/class_list_macros.hpp>
 #include <cmath>
 
-
 namespace hero_chassis_controller {
 
+HeroChassisController::HeroChassisController()
+    : tf_listener_(tfBuffer_) {
+  ROS_INFO("TF2 Transform Listener initialized.");
+}
 bool HeroChassisController::init(hardware_interface::EffortJointInterface* effort_joint_interface,
                                  ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh)
+
 {
   std::cout << "******************************init*************************************" << std::endl;
   front_left_joint_ = effort_joint_interface->getHandle("left_front_wheel_joint");
@@ -62,8 +66,6 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
 
   last_time_ = ros::Time::now();
 
-  tf2_ros::TransformListener tf_listener_(tfBuffer_);
-
   ROS_INFO("Successfully init controller with target velocities: FL=%f, FR=%f, BL=%f, BR=%f",
            target_velocity_1_, target_velocity_2_, target_velocity_3_, target_velocity_4_);
   return true;
@@ -116,7 +118,7 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
 
   // 设置odom的名称和时间戳
   q.setRPY(0.0, 0.0, theta_);  // 设置roll, pitch, yaw（这里roll和pitch为0）
-  geometry_msgs::Quaternion odom_quat = toMsg(q);  // 将四元数转换为 ROS 消息类型
+  odom_quat = toMsg(q);  // 将四元数转换为 ROS 消息类型
   odom.header.stamp = time;
   odom.header.frame_id = "odom";
 
@@ -125,9 +127,10 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   odom.pose.pose.position.y = y_;
   odom.pose.pose.position.z = 0.0;
   odom.pose.pose.orientation = odom_quat;
-
+  // 发布odom
   odom_pub_.publish(odom);
 
+  // 设置tf变换的名称和时间戳
   odom_trans.header.stamp = time;
   odom_trans.header.frame_id = "odom";
   odom_trans.child_frame_id = "base_link";
@@ -143,28 +146,50 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
 }
 
 void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg)
-{
+{;
   double vx = msg->linear.x;
   double vy = msg->linear.y;
   double wz = msg->angular.z;
+  double L = wheel_base_;
+  double W = track_width_;
+  double r = wheel_radius;
 
-  if (velocity_mode_ == "base"){}
+  if (velocity_mode_ == "base")
+  {
+    wheel_speeds = Kinematics::inverseKinematics(vx, vy, wz, L, W, r);
+    target_velocity_1_ = wheel_speeds[0];
+    target_velocity_2_ = wheel_speeds[1];
+    target_velocity_3_ = wheel_speeds[2];
+    target_velocity_4_ = wheel_speeds[3];
+  }
 
   else if (velocity_mode_ == "global")
   {
+    // std::cout << "vx: " << vx << " vy: " << vy << " wz: " << wz << std::endl;
     geometry_msgs::Vector3Stamped velocity_global;
+
     velocity_global.vector.x = vx;
     velocity_global.vector.y = vy;
     velocity_global.vector.z = 0.0;
     velocity_global.header.frame_id = "odom";
-    velocity_global.header.stamp = ros::Time::now();
+    velocity_global.header.stamp = last_time_;
 
     geometry_msgs::Vector3Stamped velocity_base;
+
     try
     {
       tfBuffer_.transform(velocity_global, velocity_base, "base_link");
       vx = velocity_base.vector.x;
       vy = velocity_base.vector.y;
+      std::cout << "vx: " << vx << " vy: " << vy << std::endl;
+
+      // 逆运动学计算目标速度
+      wheel_speeds = Kinematics::inverseKinematics(vx, vy, wz, L, W, r);
+      target_velocity_1_ = wheel_speeds[0];
+      target_velocity_2_ = wheel_speeds[1];
+      target_velocity_3_ = wheel_speeds[2];
+      target_velocity_4_ = wheel_speeds[3];
+      // std::cout<< "target_velocity_1_: " << target_velocity_1_ << " target_velocity_2_: " << target_velocity_2_ << " target_velocity_3_: " << target_velocity_3_ << " target_velocity_4_: " << target_velocity_4_ << std::endl;
     }
     catch (tf2::TransformException& ex)
     {
@@ -172,20 +197,11 @@ void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr&
     }
   }
 
-  // std::cout << "vx: " << vx << " vy: " << vy << " wz: " << wz << std::endl;
 
-  double L = wheel_base_;
-  double W = track_width_;
-  double r = wheel_radius;
 
-  // 逆运动学计算目标速度
-  wheel_speeds = Kinematics::inverseKinematics(vx, vy, wz, L, W, r);
-  target_velocity_1_ = wheel_speeds[0];
-  target_velocity_2_ = wheel_speeds[1];
-  target_velocity_3_ = wheel_speeds[2];
-  target_velocity_4_ = wheel_speeds[3];
 
-  // std::cout<< "target_velocity_1_: " << target_velocity_1_ << " target_velocity_2_: " << target_velocity_2_ << " target_velocity_3_: " << target_velocity_3_ << " target_velocity_4_: " << target_velocity_4_ << std::endl;
+
+
 }
 
 bool HeroChassisController::loadParams(ros::NodeHandle& controller_nh, control_toolbox::Pid& pid, double& target_velocity, const std::string& prefix)
