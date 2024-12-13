@@ -1,5 +1,5 @@
 #include "hero_chassis_controller/Algorithm.h"
-
+#include <iostream>
 
 
 // 低通滤波函数，输入原始数据和系数，返回滤波后的数据
@@ -21,6 +21,7 @@ std::vector<double> Kinematics::inverseKinematics(double vx, double vy, double w
   wheel_speeds[1] = (vx + vy + (L + W) * wz) / r;
   wheel_speeds[2] = (vx + vy - (L + W) * wz) / r;
   wheel_speeds[3] = (vx - vy + (L + W) * wz) / r;
+  // std::cout << "w1: " << wheel_speeds[0] << " w2: " << wheel_speeds[1] << " w3: " << wheel_speeds[2] << " w4: " << wheel_speeds[3] << std::endl;
 
   return wheel_speeds;
 
@@ -36,6 +37,7 @@ std::vector<double> Kinematics::forwardKinematics(double w1, double w2, double w
   double vx = r / 4 * (w1 + w2 + w3 + w4);
   double vy = r / 4 * (-w1 + w2 + w3 - w4);
   double wz = r / (4 * (L + W)) * (-w1 + w2 - w3 + w4);
+  // std::cout << "vx: " << vx << " vy: " << vy << " wz: " << wz << std::endl;
 
   baselink[0] = vx;
   baselink[1] = vy;

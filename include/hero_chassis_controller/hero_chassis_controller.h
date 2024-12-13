@@ -48,7 +48,7 @@ private:
   Filter fliter_front_right_;
   Filter fliter_back_left_;
   Filter fliter_back_right_;
-  double alpha_lowPassFilter_ = 0.1;
+  double alpha_lowPassFilter_ = 0.3;
 
   double target_velocity_1_ = 0;
   double target_velocity_2_ = 0;
@@ -82,6 +82,9 @@ private:
   double x_ = 0.0;
   double y_ = 0.0;
   double theta_ = 0.0;
+  double vx = 0.0;
+  double vy = 0.0;
+  double vtheta = 0.0;
 
   std::string velocity_mode_;
 

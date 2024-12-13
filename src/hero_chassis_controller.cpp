@@ -79,6 +79,7 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   double current_velocity_3 = fliter_back_left_.lowPassFilter(back_left_joint_.getVelocity(), alpha_lowPassFilter_);
   double current_velocity_4 = fliter_back_right_.lowPassFilter(back_right_joint_.getVelocity(), alpha_lowPassFilter_);
 
+  // std::cout << "current_velocity_1: " << current_velocity_1 << " current_velocity_2: " << current_velocity_2 << " current_velocity_3: " << current_velocity_3 << " current_velocity_4: " << current_velocity_4 << std::endl;
   // // 获取当前速度
   // double current_velocity_1 = front_left_joint_.getVelocity();
   // double current_velocity_2 = front_right_joint_.getVelocity();
@@ -86,23 +87,25 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   // double current_velocity_4 = back_right_joint_.getVelocity();
 
   // PID计算
-  double front_left_v = pid_front_left_.computeCommand(target_velocity_1_ - current_velocity_1, period);
-  double front_right_v = pid_front_right_.computeCommand(target_velocity_2_ - current_velocity_2, period);
-  double back_left_v = pid_back_left_.computeCommand(target_velocity_3_ - current_velocity_3, period);
-  double back_right_v = pid_back_right_.computeCommand(target_velocity_4_ - current_velocity_4, period);
+  double front_left_out = pid_front_left_.computeCommand(target_velocity_1_ - current_velocity_1, period);
+  double front_right_out = pid_front_right_.computeCommand(target_velocity_2_ - current_velocity_2, period);
+  double back_left_out = pid_back_left_.computeCommand(target_velocity_3_ - current_velocity_3, period);
+  double back_right_out = pid_back_right_.computeCommand(target_velocity_4_ - current_velocity_4, period);
+
+  // std::cout << "front_left_v: " << front_left_out << " front_right_v: " << front_right_out << " back_left_v: " << back_left_out << " back_right_v: " << back_right_out << std::endl;
 
   // 设置控制命令
-  front_left_joint_.setCommand(front_left_v);
-  front_right_joint_.setCommand(front_right_v);
-  back_left_joint_.setCommand(back_left_v);
-  back_right_joint_.setCommand(back_right_v);
+  front_left_joint_.setCommand(front_left_out);
+  front_right_joint_.setCommand(front_right_out);
+  back_left_joint_.setCommand(back_left_out);
+  back_right_joint_.setCommand(back_right_out);
 
   // 正运动学解算
-  baselink = Kinematics::forwardKinematics(front_left_v, front_right_v, back_left_v, back_right_v, wheel_base_, track_width_, wheel_radius);
+  baselink = Kinematics::forwardKinematics(current_velocity_1, current_velocity_2, current_velocity_3, current_velocity_4, wheel_base_, track_width_, wheel_radius);
   double dt = (time - last_time_).toSec();
-  double vx = baselink[0] * cos(theta_) - baselink[1] * sin(theta_);
-  double vy = baselink[0] * sin(theta_) + baselink[1] * cos(theta_);
-  double vtheta = baselink[2];
+  vx = baselink[0] * cos(theta_) - baselink[1] * sin(theta_);
+  vy = baselink[0] * sin(theta_) + baselink[1] * cos(theta_);
+  vtheta = baselink[2];
   double delta_x = vx * dt;
   double delta_y = vy * dt;
   double delta_theta = baselink[2] * dt;
