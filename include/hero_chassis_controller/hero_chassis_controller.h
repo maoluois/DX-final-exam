@@ -15,7 +15,9 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/transform_listener.h>
 #include <nav_msgs/Odometry.h>
+#include <tf/tf.h>
 // #include "hero_chassis_controller/WheelParams.h"
 
 namespace hero_chassis_controller
@@ -67,17 +69,19 @@ private:
   nav_msgs::Odometry odom;
   // ??? 不能用静态变量
   tf2_ros::TransformBroadcaster odom_broadcaster;
+  tf2_ros::Buffer tfBuffer_;
   tf2::Quaternion q;
   geometry_msgs::Quaternion odom_quat;
   geometry_msgs::TransformStamped odom_trans;
   std::vector<double> baselink;
   std::vector<double> wheel_speeds;
 
+
   double x_ = 0.0;
   double y_ = 0.0;
   double theta_ = 0.0;
 
-
+  std::string velocity_mode_;
 
 };
   // 从参数服务器加载PID参数

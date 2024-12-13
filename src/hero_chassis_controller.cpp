@@ -36,6 +36,13 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
     ROS_WARN("Using default track_width: %f", track_width_);
   }
 
+  // 从参数服务器加载速度模式
+  if (!controller_nh.getParam("velocity_mode", velocity_mode_))
+  {
+    velocity_mode_ = "global"; // 默认值
+    ROS_WARN("Using default velocity_mode: %s", velocity_mode_.c_str());
+  }
+
   // 初始化低通滤波器
   fliter_front_left_ = Filter();
   fliter_front_right_ = Filter();
@@ -54,6 +61,8 @@ bool HeroChassisController::init(hardware_interface::EffortJointInterface* effor
   theta_ = 0.0;
 
   last_time_ = ros::Time::now();
+
+  tf2_ros::TransformListener tf_listener_(tfBuffer_);
 
   ROS_INFO("Successfully init controller with target velocities: FL=%f, FR=%f, BL=%f, BR=%f",
            target_velocity_1_, target_velocity_2_, target_velocity_3_, target_velocity_4_);
@@ -107,7 +116,7 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
 
   // 设置odom的名称和时间戳
   q.setRPY(0.0, 0.0, theta_);  // 设置roll, pitch, yaw（这里roll和pitch为0）
-  geometry_msgs::Quaternion odom_quat = tf2::toMsg(q);  // 将四元数转换为 ROS 消息类型
+  geometry_msgs::Quaternion odom_quat = toMsg(q);  // 将四元数转换为 ROS 消息类型
   odom.header.stamp = time;
   odom.header.frame_id = "odom";
 
@@ -138,6 +147,30 @@ void HeroChassisController::cmdVelCallback(const geometry_msgs::Twist::ConstPtr&
   double vx = msg->linear.x;
   double vy = msg->linear.y;
   double wz = msg->angular.z;
+
+  if (velocity_mode_ == "base"){}
+
+  else if (velocity_mode_ == "global")
+  {
+    geometry_msgs::Vector3Stamped velocity_global;
+    velocity_global.vector.x = vx;
+    velocity_global.vector.y = vy;
+    velocity_global.vector.z = 0.0;
+    velocity_global.header.frame_id = "odom";
+    velocity_global.header.stamp = ros::Time::now();
+
+    geometry_msgs::Vector3Stamped velocity_base;
+    try
+    {
+      tfBuffer_.transform(velocity_global, velocity_base, "base_link");
+      vx = velocity_base.vector.x;
+      vy = velocity_base.vector.y;
+    }
+    catch (tf2::TransformException& ex)
+    {
+      ROS_WARN("Could not transform velocity from odom to base_link: %s", ex.what());
+    }
+  }
 
   // std::cout << "vx: " << vx << " vy: " << vy << " wz: " << wz << std::endl;
 
