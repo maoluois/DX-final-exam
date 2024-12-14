@@ -30,8 +30,8 @@ std::vector<double> Kinematics::inverseKinematics(double vx, double vy, double w
 // 正运动学
 std::vector<double> Kinematics::forwardKinematics(double w1, double w2, double w3, double w4, double wheel_base, double track_width, double r)
 {
-  double L = wheel_base;
-  double W = track_width;
+  double L = wheel_base / 2;
+  double W = track_width / 2;
 
   std::vector<double> baselink(3);
   double vx = r / 4 * (w1 + w2 + w3 + w4);
