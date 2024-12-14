@@ -117,7 +117,7 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   theta_ = theta_ + delta_theta;
 
   // 标准化角度
-  // theta_ = normalizeAngle(theta_ + delta_theta);
+  theta_ = normalizeAngle(theta_ + delta_theta);
 
   // // 弧度转角度
   double Degree = radians2degrees(theta_);
