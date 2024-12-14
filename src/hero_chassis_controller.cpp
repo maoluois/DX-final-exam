@@ -114,15 +114,14 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
 
   x_ += delta_x;
   y_ += delta_y;
-  theta_ = theta_ + delta_theta;
 
   // 标准化角度
+  // theta_ = theta_ + delta_theta;
   theta_ = normalizeAngle(theta_ + delta_theta);
 
   // // 弧度转角度
-  double Degree = radians2degrees(theta_);
-
-  std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << std::endl;
+  // double Degree = radians2degrees(theta_);
+  // std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << "theta: " << theta_ << std::endl;
   // std::cout << "vx: " << vx << " vy: " << vy << " vtheta: " << vtheta << std::endl;
 
   // 设置odom的名称和时间戳

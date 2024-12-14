@@ -49,8 +49,10 @@ std::vector<double> Kinematics::forwardKinematics(double w1, double w2, double w
 // 角度标准化
 double normalizeAngle(double angle)
 {
+  std::cout << "Normalizing angle: before = " << angle << std::endl;
   while (angle > M_PI) angle -= 2 * M_PI;
   while (angle < -M_PI) angle += 2 * M_PI;
+  std::cout << "Normalizing angle: after = " << angle << std::endl;
   return angle;
 }
 
