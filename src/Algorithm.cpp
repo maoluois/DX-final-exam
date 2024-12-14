@@ -13,8 +13,8 @@ double Filter::lowPassFilter(double input, double alpha)
 // 逆运动学
 std::vector<double> Kinematics::inverseKinematics(double vx, double vy, double wz, double wheel_base, double track_width, double r)
 {
-  double L = wheel_base;
-  double W = track_width;
+  double L = wheel_base / 2;
+  double W = track_width / 2;
 
   std::vector<double> wheel_speeds(4);
   wheel_speeds[0] = (vx - vy - (L + W) * wz) / r;

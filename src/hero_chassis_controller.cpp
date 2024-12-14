@@ -108,20 +108,21 @@ void HeroChassisController::update(const ros::Time& time, const ros::Duration& p
   vtheta = baselink[2];
   double delta_x = vx * dt;
   double delta_y = vy * dt;
-  double delta_theta = baselink[2] * dt;
+  double delta_theta = vtheta * dt;
 
   // std::cout << baselink[0] << " " << baselink[1] << " " << baselink[2] << std::endl;
 
   x_ += delta_x;
   y_ += delta_y;
+  theta_ = theta_ + delta_theta;
 
   // 标准化角度
-  theta_ = normalizeAngle(theta_ + delta_theta);
+  // theta_ = normalizeAngle(theta_ + delta_theta);
 
   // // 弧度转角度
-  // double Degree = radians2degrees(theta_);
+  double Degree = radians2degrees(theta_);
 
-  // std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << std::endl;
+  std::cout << "x: " << x_ << " y: " << y_ << " theta: " << Degree << std::endl;
   // std::cout << "vx: " << vx << " vy: " << vy << " vtheta: " << vtheta << std::endl;
 
   // 设置odom的名称和时间戳

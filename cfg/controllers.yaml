@@ -32,4 +32,4 @@ controller:
 
 wheel_base: 0.4
 track_width: 0.4
-velocity: base
+velocity: global
