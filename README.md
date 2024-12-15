@@ -68,7 +68,7 @@ source devel/setup.bash
 roslaunch hero_chassis_controller hero_chassis_controller.launch
 ```
 
-## UsageW
+## Usage
 
 🎛️🎛️🎛️ Run the main node: 🎛️🎛️🎛️
 
@@ -148,7 +148,7 @@ track_width: 0.4
 
 ## Bugs & Feature Requests
 
-🐞🐞🐞 Please report bugs and request features using the [Issue Tracker](https://github.com/your-repo/hero_chassis_controller/issues). 🐞🐞🐞
+🐞🐞🐞 Please report bugs and request features using the [Issue Tracker](https://github.com/maoluois/DX-final-exam.git). 🐞🐞🐞
 
 [ROS]: http://www.ros.org
 [Eigen]: http://eigen.tuxfamily.org
