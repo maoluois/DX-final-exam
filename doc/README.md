@@ -1,200 +1,157 @@
-# Package Name
+# Hero Chassis Controller
 
 ## Overview
 
-This is a template: replace, remove, and add where required. Describe here what this package does and what it's meant
-for in a few sentences.
+🚗🚗🚗 This ROS package implements various control mechanisms for a four-wheeled mobile robot, including PID control, kinematics, odometry, and global velocity control. It also supports additional customizable features. The controller is based on `ros_control` and is loaded using `pluginlib`. 🚗🚗🚗
 
-**Keywords:** example, package, template
-
-Or, add some keywords to the Bitbucket or GitHub repository.
+**Keywords:** hero_chassis_controller, ROS, ros_control, mobile robot, pluginlib
 
 ### License
 
-The source code is released under a [BSD 3-Clause license](LICENSE).
+📜📜📜 The source code is released under a [BSD 3-Clause license](../LICENSE.txt). 📜📜📜
 
-**Author: Péter Fankhauser<br />
-Affiliation: [ANYbotics](https://www.anybotics.com/)<br />
-Maintainer: Péter Fankhauser, pfankhauser@anybotics.com**
+**Author:** Mao Luo  
+**Affiliation:** [Mao Luo](https://github.com/gdut-dynamic-x/simple_chassis_controller/blob/master)  
+**Maintainer:** Mao Luo, 3214283533@qq.com
 
-The PACKAGE NAME package has been tested under [ROS] Indigo, Melodic and Noetic on respectively Ubuntu 14.04, 18.04 and
-20.04. This is research code, expect that it changes often and any fitness for a particular purpose is disclaimed.
+🛠️🛠️🛠️ The Hero Chassis Controller package has been tested on ROS Indigo and Noetic on Ubuntu 20.04. This is research code, and changes may occur frequently; fitness for any particular purpose is disclaimed. 🛠️🛠️🛠️
 
-[![Build Status](http://rsl-ci.ethz.ch/buildStatus/icon?job=ros_best_practices)](http://rsl-ci.ethz.ch/job/ros_best_practices/)
-
-![Example image](doc/example.jpg)
-
-[comment]: <> (### Publications)
-
-[comment]: <> (If you use this work in an academic context, please cite the following publication&#40;s&#41;:)
-
-[comment]: <> (* P. Fankhauser, M. Bloesch, C. Gehring, M. Hutter, and R. Siegwart: **PAPER TITLE**. IEEE/RSJ International Conference)
-
-[comment]: <> (  on Intelligent Robots and Systems &#40;IROS&#41;, 2015. &#40;[PDF]&#40;http://dx.doi.org/10.3929/ethz-a-010173654&#41;&#41;)
-
-[comment]: <> (        @inproceedings{Fankhauser2015,)
-
-[comment]: <> (            author = {Fankhauser, P\'{e}ter and Hutter, Marco},)
-
-[comment]: <> (            booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems &#40;IROS&#41;},)
-
-[comment]: <> (            title = {{PAPER TITLE}},)
-
-[comment]: <> (            publisher = {IEEE},)
-
-[comment]: <> (            year = {2015})
-
-[comment]: <> (        })
+![Example image](example.png)
 
 ## Installation
-
-### Installation from Packages
-
-To install all packages from the this repository as Debian packages use
-
-    sudo apt-get install ros-noetic-...
-
-Or better, use `rosdep`:
-
-	sudo rosdep install --from-paths src
 
 ### Building from Source
 
 #### Dependencies
 
-- [Robot Operating System (ROS)](http://wiki.ros.org) (middleware for robotics),
-- [Eigen] (linear algebra library)
+📚📚📚 - [Robot Operating System (ROS)](http://wiki.ros.org) (middleware for robotics)
+- [Eigen](http://eigen.tuxfamily.org) (linear algebra library) 📚📚📚
 
-  sudo rosdep install --from-paths src
+Install dependencies:
+
+```bash
+sudo rosdep install --from-paths src
+```
 
 #### Building
 
-To build from source, clone the latest version from this repository into your catkin workspace and compile the package
-using
+🔧🔧🔧 To build from source, clone the latest version from this repository into your catkin workspace and compile the package: 🔧🔧🔧
 
-	cd catkin_workspace/src
-	git clone https://github.com/ethz-asl/ros_best_practices.git
-	cd ../
-	rosdep install --from-paths . --ignore-src
-	catkin_make
+```bash
+cd ~/catkin_ws/src
+git clone https://github.com/maoluois/DX-final-exam.git
+cd ../
+rosdep install --from-paths . --ignore-src
+catkin_make
+```
 
 ### Running in Docker
 
-Docker is a great way to run an application with all dependencies and libraries bundles together. Make sure
-to [install Docker](https://docs.docker.com/get-docker/) first.
+🐋🐋🐋 Docker is a convenient way to run an application with all dependencies bundled together. First, [install Docker](https://docs.docker.com/get-docker/). 🐋🐋🐋
 
-First, spin up a simple container:
+Spin up a simple container:
 
-	docker run -ti --rm --name ros-container ros:noetic bash
+```bash
+docker run -ti --rm --name ros-container ros:noetic bash
+```
 
-This downloads the `ros:noetic` image from the Docker Hub, indicates that it requires an interactive terminal (`-t, -i`)
-, gives it a name (`--name`), removes it after you exit the container (`--rm`) and runs a command (`bash`).
+Now, create a catkin workspace, clone the package, build it, and source the setup:
 
-Now, create a catkin workspace, clone the package, build it, done!
+```bash
+apt-get update && apt-get install -y git
+mkdir -p /ws/src && cd /ws/src
+git clone https://github.com/maoluois/DX-final-exam.git
+cd ..
+rosdep install --from-path src
+catkin_make
+source devel/setup.bash
+roslaunch hero_chassis_controller hero_chassis_controller.launch
+```
 
-	apt-get update && apt-get install -y git
-	mkdir -p /ws/src && cd /ws/src
-	git clone https://github.com/leggedrobotics/ros_best_practices.git
-	cd ..
-	rosdep install --from-path src
-	catkin_make
-	source devel/setup.bash
-	roslaunch ros_package_template ros_package_template.launch
+## UsageW
 
-### Unit Tests
+🎛️🎛️🎛️ Run the main node: 🎛️🎛️🎛️
 
-Run the unit tests with
+```bash
+roslaunch hero_chassis_controller hero_chassis_controller.launch
+```
 
-	catkin_make run_tests_ros_package_template
+## Configuration Files
 
-### Static code analysis
+### Config File: `pid_params.yaml`
 
-Run the static code analysis with
+📄📄📄 Defines PID control parameters for each wheel: 📄📄📄
 
-	catkin_make roslint_ros_package_template
+```yaml
+controller:
+  hero_chassis_controller:
+    type: hero_chassis_controller/HeroChassisController
+    front_left:
+      p: 30.0
+      i: 1.0
+      d: 0.0
+      target_velocity: 10.0
 
-## Usage
+    front_right:
+      p: 30.0
+      i: 1.0
+      d: 0.0
+      target_velocity: 10.0
 
-Describe the quickest way to run this software, for example:
+    back_left:
+      p: 30.0
+      i: 1.0
+      d: 0.0
+      target_velocity: 10.0
 
-Run the main node with
+    back_right:
+      p: 30.0
+      i: 1.0
+      d: 0.0
+      target_velocity: 10.0
+```
 
-	roslaunch ros_package_template ros_package_template.launch
+📄📄📄 Defines controllers mode (global or base): 📄📄📄
 
-## Config files
+```yaml
+velocity: global  
+```
 
-Config file folder/set 1
+📄📄📄 Defines robot wheel base and track width: 📄📄📄
 
-* **config_file_1.yaml** Shortly explain the content of this config file
-
-Config file folder/set 2
-
-* **...**
-
-## Launch files
-
-* **launch_file_1.launch:** shortly explain what is launched (e.g standard simulation, simulation with gdb,...)
-
-  Argument set 1
-
-    - **`argument_1`** Short description (e.g. as commented in launch file). Default: `default_value`.
-
-  Argument set 2
-
-    - **`...`**
-
-* **...**
+```yaml
+wheel_base: 0.4
+track_width: 0.4
+```
 
 ## Nodes
 
-### ros_package_template
+### `hero_chassis_controller`
 
-Reads temperature measurements and computed the average.
+🤖🤖🤖 Implements the main chassis control logic. 🤖🤖🤖
 
 #### Subscribed Topics
 
-* **`/temperature`** ([sensor_msgs/Temperature])
-
-  The temperature measurements from which the average is computed.
+- **`/cmd_vel`** ([geometry_msgs/Twist]): Velocity commands for the robot.
 
 #### Published Topics
 
-...
-
-#### Services
-
-* **`get_average`** ([std_srvs/Trigger])
-
-  Returns information about the current average. For example, you can trigger the computation from the console with
-
-  	rosservice call /ros_package_template/get_average
+- **`/cmd_vel`** ([geometry_msgs/Twist]): Velocity commands for the robot.
+- **`/odom`** ([nav_msgs/Odometry]): Odo2metry information.
+- **`/tf`**: Transform between `odom` and `base_link`.
 
 #### Parameters
 
-* **`subscriber_topic`** (string, default: "/temperature")
-
-  The name of the input topic.
-
-* **`cache_size`** (int, default: 200, min: 0, max: 1000)
-
-  The size of the cache.
-
-### NODE_B_NAME
-
-...
+- **`wheel_radius`** (double): Radius of the wheels. Default: `0.07625`.
+- **`wheel_base`** (double): Distance between front and back wheels. Default: `0.4`.
+- **`track_width`** (double): Distance between left and right wheels. Default: `0.4`.
 
 ## Bugs & Feature Requests
 
-Please report bugs and request features using the [Issue Tracker](https://github.com/gdut-dynamic-x/rm_template/issues)
-.
-
+🐞🐞🐞 Please report bugs and request features using the [Issue Tracker](https://github.com/your-repo/hero_chassis_controller/issues). 🐞🐞🐞
 
 [ROS]: http://www.ros.org
-
-[rviz]: http://wiki.ros.org/rviz
-
 [Eigen]: http://eigen.tuxfamily.org
+[geometry_msgs/Twist]: http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html
+[nav_msgs/Odometry]: http://docs.ros.org/api/nav_msgs/html/msg/Odometry.html
 
-[std_srvs/Trigger]: http://docs.ros.org/api/std_srvs/html/srv/Trigger.html
-
-[sensor_msgs/Temperature]: http://docs.ros.org/api/sensor_msgs/html/msg/Temperature.html
